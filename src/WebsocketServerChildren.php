@@ -34,7 +34,14 @@ class WebsocketServerChildren extends SocketIO
         }
     }
 
-    public function shutdown(int $how = self::SHUTDOWN_ALL)
+    /**
+     * Shuts down a socket for receiving, sending, or both
+     *
+     * @param int $how
+     *
+     * @return bool
+     */
+    public function shutdown(int $how = self::SHUTDOWN_ALL): bool
     {
         return socket_shutdown($this->resource, $how);
     }
@@ -42,9 +49,9 @@ class WebsocketServerChildren extends SocketIO
     /**
      * Close open connection
      *
-     * @return Socket
+     * @return WebsocketServerChildren
      */
-    public function close()
+    public function close(): WebsocketServerChildren
     {
         if ($this->isConnected) {
             $this->shutdown(self::SHUTDOWN_ALL);
