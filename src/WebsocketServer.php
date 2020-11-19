@@ -2,6 +2,7 @@
 namespace Websocket;
 
 use Websocket\Exceptions\ExceptionSocketErrors;
+use Websocket\Exceptions\ExceptionWebsocketServer;
 
 class WebsocketServer extends Socket
 {
@@ -9,7 +10,9 @@ class WebsocketServer extends Socket
     const STATE_RUN     = 1;
     const STATE_PAUSE   = 2;
 
-    private int $status = self::STATE_RUN;
+    private static array $listState = [self::STATE_STOP, self::STATE_RUN, self::STATE_PAUSE];
+
+    private int $state = self::STATE_RUN;
 
     private $resource;
 
@@ -55,6 +58,22 @@ class WebsocketServer extends Socket
         return $this;
     }
 
+    public function setState(int $state): WebsocketServer
+    {
+        if (!in_array($state, self::$listState, true)) {
+            throw new ExceptionWebsocketServer("Unknown state - $state", ExceptionWebsocketServer::__UNKNOWN_STATE);
+        }
+
+        $this->state = $state;
+
+        return $this;
+    }
+
+    public function getState(): int
+    {
+        return $this->state;
+    }
+
     /**
      * @param callable $function
      * @param int $backlog
@@ -62,14 +81,14 @@ class WebsocketServer extends Socket
      *
      * @throws ExceptionSocketErrors
      */
-    public function run(callable $function, int $backlog = 0, int $wait = 500)
+    public function run(callable $function, int $backlog = 0, int $wait = 100)
     {
         $this->bind()->listen($backlog);
 
-        while($this->status !== self::STATE_STOP) {
-            if ($this->status !== self::STATE_PAUSE
-                && ($socket = socket_accept($this->resource)) !== false) {
-                $function($socket);
+        while($this->state !== self::STATE_STOP) {
+            if ($this->state !== self::STATE_PAUSE
+                && ($socket = @socket_accept($this->resource)) !== false) {
+                $function($this, $socket);
             }
 
             usleep($wait);

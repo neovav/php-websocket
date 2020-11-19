@@ -15,8 +15,6 @@ class Socket
 
     private int $port;
 
-    private bool $isConnect = false;
-
     private array $options = [];
 
     private bool $isBlockMode = false;
@@ -33,16 +31,6 @@ class Socket
         $this->resource = $resource;
         $this->address = $address;
         $this->port = $port;
-    }
-
-    /**
-     * Destructor of the Socket class
-     */
-    public function __destruct()
-    {
-        if ($this->isConnect()) {
-            $this->close();
-        }
     }
 
     /**
@@ -152,98 +140,5 @@ class Socket
         return $this->port;
     }
 
-    /**
-     * Establish connect with remote service
-     *
-     * @return Socket
-     */
-    protected function _connect()
-    {
-        $resource = $this->resource->resource();
-        $result = socket_connect($resource, $this->address, $this->port);
-        $this->isConnect = true;
-        return $this;
-    }
 
-    /**
-     * Disconnect with remote service
-     *
-     * @return Socket
-     */
-    public function close()
-    {
-        $result = socket_close($this->resource->resource());
-        $this->isConnect = false;
-        return $this;
-    }
-
-    /**
-     * Check connection status
-     *
-     * @return bool
-     */
-    public function isConnect(): bool
-    {
-        return $this->isConnect;
-    }
-
-    /**
-     * Read data from socket
-     *
-     * @param int $length
-     * @param int $type
-     *
-     * @return string
-     *
-     * @throws ExceptionSocket|ExceptionSocketErrors
-     */
-    public function read(int $length, int $type = self::READ_TYPE_BINARY): string
-    {
-        if (!$this->isConnect()) {
-            $this->_connect();
-        }
-
-        if ($type !== self::READ_TYPE_BINARY && $type !== self::READ_TYPE_NORMAL) {
-            throw new ExceptionSocket("Unknown read type - $type", ExceptionSocket::__UNKNOWN_READ_TYPE);
-        }
-        $resource = $this->resource->resource();
-
-        $result = socket_read($resource, $length, $type);
-
-        if (is_bool($result) && !$result) {
-            ExceptionSocketErrors::generate($resource);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Write data to socket
-     *
-     * @param string $data
-     * @param int $length
-     *
-     * @return int
-     *
-     * @throws ExceptionSocketErrors
-     */
-    public function write(string $data, int $length = 0): int
-    {
-        if (!$this->isConnect()) {
-            $this->_connect();
-        }
-
-        $resource = $this->resource->resource();
-        if (empty($length)) {
-            $length = mb_strlen($data);
-        }
-
-        $result = socket_write ( $resource, $data, $length);
-
-        if (is_bool($result) && !$result) {
-            ExceptionSocketErrors::generate($resource);
-        }
-
-        return $result;
-    }
 }

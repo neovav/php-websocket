@@ -23,7 +23,7 @@ class SocketResource
     private int $protocol;
 
         /** @var Object $resource  Socket resource, also referred to as an endpoint of communication */
-    private Object $resource;
+    private $resource;
 
     /**
      * Constructor of class SocketResource
@@ -31,10 +31,13 @@ class SocketResource
      * @param int $domain       specifies the protocol family to be used by the socket.
      * @param int $type         selects the type of communication to be used by the socket
      * @param int $protocol     specific protocol to be used when communicating
+     * @param resource|null $resource
      *
      * @throws ExceptionSocketResource
      */
-    public function __construct(int $domain = Domain::AF_INET, int $type = Type::SOCK_STREAM, int $protocol = Protocol::TCP)
+    public function __construct(
+        int $domain = Domain::AF_INET, int $type = Type::SOCK_STREAM, int $protocol = Protocol::TCP, $resource = null
+    )
     {
         if (!in_array($domain, Domain::LIST_DOMAINS, true)) {
             throw new ExceptionSocketResource("Is not correct domain - $domain", 0);
@@ -44,19 +47,24 @@ class SocketResource
             throw new ExceptionSocketResource("Is not correct type - $type", 0);
         }
 
-        $result = socket_create($domain, $type, $protocol);
+        if (!is_null($resource)) {
+            if (!is_resource($resource)) {
+                throw new ExceptionSocketResource("Is not correct resource", 0);
+            }
+            $this->resource = $resource;
+        } else {
+            $this->resource = socket_create($domain, $type, $protocol);
 
-        if ($result === false) {
-            $errorCode = socket_last_error();
-            $errorText = socket_strerror($errorCode);
-            throw new ExceptionSocketResource($errorText, $errorCode);
+            if ($this->resource === false) {
+                $errorCode = socket_last_error();
+                $errorText = socket_strerror($errorCode);
+                throw new ExceptionSocketResource($errorText, $errorCode);
+            }
         }
 
         $this->domain = $domain;
         $this->type = $type;
         $this->protocol = $protocol;
-
-        $this->resource = $result;
     }
 
     /**
