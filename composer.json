@@ -1,9 +1,9 @@
 {
-    "name": "neovav/php-websocket-client",
+    "name": "neovav/php-websocket",
     "type": "library",
     "support": {
-        "issues": "https://github.com/neovav/php-websocket-client/issues",
-        "source": "https://github.com/neovav/php-websocket-client"
+        "issues": "https://github.com/neovav/php-websocket/issues",
+        "source": "https://github.com/neovav/php-websocket"
     },
     "minimum-stability": "beta",
     "description": "Php websocket client library",
