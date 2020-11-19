@@ -1,0 +1,33 @@
+{
+    "name": "neovav/php-websocket-client",
+    "type": "library",
+    "support": {
+        "issues": "https://github.com/neovav/php-websocket-client/issues",
+        "source": "https://github.com/neovav/php-websocket-client"
+    },
+    "minimum-stability": "beta",
+    "description": "Php websocket client library",
+    "keywords": [
+        "php",
+        "websocket",
+        "websocket client"
+    ],
+    "license": "Apache-2.0",
+    "require": {
+        "php": "~7.4",
+        "vlucas/phpdotenv": "^5.2",
+        "ext-json": "*"
+    },
+    "authors": [
+        {
+            "name": "Verveda Aleksandr",
+            "email": "neovav@outlook.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Websocket\\": "src/"
+        }
+    }
+}
