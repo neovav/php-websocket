@@ -16,6 +16,8 @@ class WebsocketServer extends Socket
 
     private $resource;
 
+    private $acceptExceptionHandler;
+
     /**
      * Constructor of the Socket class
      *
@@ -31,6 +33,8 @@ class WebsocketServer extends Socket
     }
 
     /**
+     * Binds a name to a socket
+     *
      * @return WebsocketServer
      *
      * @throws ExceptionSocketErrors
@@ -44,6 +48,8 @@ class WebsocketServer extends Socket
     }
 
     /**
+     * Listens for a connection on a socket
+     *
      * @param int $backlog
      *
      * @return WebsocketServer
@@ -58,6 +64,15 @@ class WebsocketServer extends Socket
         return $this;
     }
 
+    /**
+     * Setup server state
+     *
+     * @param int $state
+     *
+     * @return WebsocketServer
+     *
+     * @throws ExceptionWebsocketServer
+     */
     public function setState(int $state): WebsocketServer
     {
         if (!in_array($state, self::$listState, true)) {
@@ -69,26 +84,49 @@ class WebsocketServer extends Socket
         return $this;
     }
 
+    /**
+     * Get server state
+     *
+     * @return int
+     */
     public function getState(): int
     {
         return $this->state;
     }
 
     /**
-     * @param callable $function
+     * @param callable $handler
+     *
+     * @return
+     */
+    public function setAcceptExceptionHandler(callable $handler): WebsocketServer
+    {
+        $this->acceptExceptionHandler = $handler;
+        return $this;
+    }
+
+    /**
+     * @param callable $connectionHandler
      * @param int $backlog
      * @param int $wait
      *
      * @throws ExceptionSocketErrors
      */
-    public function run(callable $function, int $backlog = 0, int $wait = 100)
+    public function run(callable $connectionHandler, int $backlog = 0, int $wait = 100)
     {
         $this->bind()->listen($backlog);
 
         while($this->state !== self::STATE_STOP) {
             if ($this->state !== self::STATE_PAUSE
                 && ($socket = @socket_accept($this->resource)) !== false) {
-                $function($this, $socket);
+                try {
+                    $connectionHandler($this, $socket);
+                } catch (\Exception $e) {
+                    $handler = $this->acceptExceptionHandler;
+                    if (is_callable($handler)) {
+                        $handler($e);
+                    }
+                }
             }
 
             usleep($wait);
