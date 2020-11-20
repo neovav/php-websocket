@@ -16,6 +16,7 @@
     "require": {
         "php": "~7.4",
         "vlucas/phpdotenv": "^5.2",
+        "neovav/internal-function-debug": "^1.0",
         "ext-json": "*",
         "ext-sockets": "*"
     },

@@ -174,6 +174,4 @@ class Socket
     {
         return $this->port;
     }
-
-
 }

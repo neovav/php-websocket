@@ -2,7 +2,7 @@
 namespace Websocket\Exceptions;
 
 /**
- * Extended Exception class for class Socket
+ * Extended Exception class for class WebsocketClient
  *
  * Copyright 2020 neovav. All rights reserved.
  *
@@ -21,17 +21,7 @@ namespace Websocket\Exceptions;
  * @author Verveda Aleksandr
  * @email neovav@outlook.com
  */
-class ExceptionSocketErrors extends \Exception
+class ExceptionWebsocketClient extends \Exception
 {
-    /**
-     * @param resource $resource
-     *
-     * @throws ExceptionSocketErrors
-     */
-    public static function generate($resource)
-    {
-        $errorCode = @socket_last_error($resource);
-        $errorText = @socket_strerror($errorCode);
-        throw new ExceptionSocketErrors($errorText, $errorCode);
-    }
+    const __ERROR_CONNECT_TO_RESOURCE = 0;
 }

@@ -4,6 +4,7 @@ namespace Websocket;
 use Websocket\Exceptions\ExceptionSocket;
 use Websocket\Exceptions\ExceptionSocketErrors;
 use Websocket\Exceptions\ExceptionSocketIO;
+use Websocket\Exceptions\ExceptionWebsocketClient;
 
 /**
  * Class for work with socket client
@@ -58,10 +59,24 @@ class WebsocketClient extends SocketIO
      * Establish connect with remote service
      *
      * @return WebsocketClient
+     *
+     * @throws ExceptionWebsocketClient|ExceptionSocketErrors
      */
     public function connect(): WebsocketClient
     {
-        $result = socket_connect($this->resource, $this->address(), $this->port());
+        $address = $this->address();
+        $port = $this->port();
+        @socket_clear_error($this->resource);
+        $result = @socket_connect($this->resource, $address, $this->port());
+        if (!empty(@socket_last_error($this->resource))) {
+            ExceptionSocketErrors::generate($this->resource);
+        };
+        if ($result === false && $this->getBlockMode()) {
+            throw new ExceptionWebsocketClient(
+                "Error connect to adress: $address (port: $port)",
+                ExceptionWebsocketClient::__ERROR_CONNECT_TO_RESOURCE
+            );
+        }
         $this->isConnected = true;
         return $this;
     }
@@ -73,7 +88,7 @@ class WebsocketClient extends SocketIO
      */
     public function close(): WebsocketClient
     {
-        socket_close($this->resource);
+        @socket_close($this->resource);
         $this->isConnected = false;
         return $this;
     }
@@ -96,7 +111,7 @@ class WebsocketClient extends SocketIO
      *
      * @return string
      *
-     * @throws ExceptionSocket|ExceptionSocketErrors|ExceptionSocketIO
+     * @throws ExceptionSocket|ExceptionSocketErrors|ExceptionSocketIO|ExceptionWebsocketClient
      */
     public function read(int $length, int $type = self::READ_TYPE_BINARY): string
     {
@@ -115,7 +130,7 @@ class WebsocketClient extends SocketIO
      *
      * @return int
      *
-     * @throws ExceptionSocketErrors
+     * @throws ExceptionSocket|ExceptionSocketErrors|ExceptionSocketIO|ExceptionWebsocketClient
      */
     public function write(string $data, int $length = 0): int
     {
@@ -123,6 +138,6 @@ class WebsocketClient extends SocketIO
             $this->connect();
         }
 
-        return $this->write($data, $length);
+        return parent::write($data, $length);
     }
 }
