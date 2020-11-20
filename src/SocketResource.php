@@ -39,7 +39,7 @@ class SocketResource
          */
     private int $protocol;
 
-        /** @var Object $resource  Socket resource, also referred to as an endpoint of communication */
+        /** @var resource $resource  Socket resource, also referred to as an endpoint of communication */
     private $resource;
 
     /**
@@ -60,7 +60,7 @@ class SocketResource
             throw new ExceptionSocketResource("Is not correct domain - $domain", 0);
         }
 
-        if (!in_array($domain, Type::LIST_TYPES, true)) {
+        if (!in_array($type, Type::LIST_TYPES, true)) {
             throw new ExceptionSocketResource("Is not correct type - $type", 0);
         }
 
@@ -70,9 +70,10 @@ class SocketResource
             }
             $this->resource = $resource;
         } else {
-            $this->resource = socket_create($domain, $type, $protocol);
+            @socket_clear_error();
+            $this->resource = @socket_create($domain, $type, $protocol);
 
-            if ($this->resource === false) {
+            if (!is_resource($this->resource) || get_resource_type($this->resource) !== 'Socket') {
                 $errorCode = socket_last_error();
                 $errorText = socket_strerror($errorCode);
                 throw new ExceptionSocketResource($errorText, $errorCode);

@@ -79,4 +79,10 @@ class SocketProtocols
 
         /** @var int IPV6_OPTS  MIT remote virtual disk */
     const RVD = 66;
+
+    const LIST_PROTOCOLS = [
+        self::IP, self::ICMP, self::GGP, self::TCP, self::EGP, self::PUP, self::UDP, self::HMP, self::XNS_IDP,
+        self::RDP, self::IPV6, self::IPV6_ROUTE, self::IPV6_FRAG, self::ESP, self::AH, self::IPv6_ICMP,
+        self::IPV6_NONXT, self::IPV6_OPTS, self::RVD,
+    ];
 }
